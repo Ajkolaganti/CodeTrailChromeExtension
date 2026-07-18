@@ -1,4 +1,4 @@
-import type { AcceptedSubmission, Difficulty } from "../../types";
+import type { AcceptedSubmission, Difficulty, ExtensionMessage } from "../../types";
 import type { CodingPlatformAdapter } from "./coding-platform-adapter";
 
 interface LeetCodeQuestionResponse {
@@ -403,7 +403,7 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
       return;
     }
     this.lastFailureKey = key;
-    void chrome.runtime.sendMessage({
+    void sendRuntimeMessage({
       type: "CONTENT_EXTRACTION_FAILED",
       route: location.pathname,
       reason
@@ -441,6 +441,24 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
     window.setTimeout(resolve, ms);
   });
+}
+
+async function sendRuntimeMessage(message: ExtensionMessage): Promise<void> {
+  if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) {
+    return;
+  }
+
+  try {
+    await chrome.runtime.sendMessage(message);
+  } catch (error) {
+    if (!isExtensionContextInvalidated(error)) {
+      console.warn("CodeTrail content message failed", error);
+    }
+  }
+}
+
+function isExtensionContextInvalidated(error: unknown): boolean {
+  return error instanceof Error && /Extension context invalidated/i.test(error.message);
 }
 
 function extractTitleFromDom(): string | null {

@@ -20,7 +20,7 @@ function sendAcceptedSubmission(submission: AcceptedSubmission): void {
     type: "CONTENT_ACCEPTED_SUBMISSION",
     submission
   };
-  void chrome.runtime.sendMessage(message);
+  void sendRuntimeMessage(message);
 }
 
 function sendPageDetected(): void {
@@ -31,5 +31,23 @@ function sendPageDetected(): void {
     route,
     pageType
   };
-  void chrome.runtime.sendMessage(message);
+  void sendRuntimeMessage(message);
+}
+
+async function sendRuntimeMessage(message: ExtensionMessage): Promise<void> {
+  if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) {
+    return;
+  }
+
+  try {
+    await chrome.runtime.sendMessage(message);
+  } catch (error) {
+    if (!isExtensionContextInvalidated(error)) {
+      console.warn("CodeTrail content message failed", error);
+    }
+  }
+}
+
+function isExtensionContextInvalidated(error: unknown): boolean {
+  return error instanceof Error && /Extension context invalidated/i.test(error.message);
 }
