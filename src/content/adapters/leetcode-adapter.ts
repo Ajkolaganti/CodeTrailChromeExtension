@@ -165,7 +165,7 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
 
     this.pollingStopTimer = window.setTimeout(() => {
       this.stopPolling();
-    }, 45000);
+    }, 5 * 60 * 1000);
   }
 
   private stopPolling(): void {
@@ -183,7 +183,7 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
   private async fetchLatestAcceptedSubmission(slug: string, question: QuestionMetadata): Promise<AcceptedSubmission | null> {
     const response = await leetcodeGraphql<SubmissionListResponse>({
       query: `query recentSubmissions($titleSlug: String!) {
-        questionSubmissionList(questionSlug: $titleSlug, offset: 0, limit: 5) {
+        questionSubmissionList(questionSlug: $titleSlug, offset: 0, limit: 20) {
           submissions {
             id
             statusDisplay
