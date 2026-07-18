@@ -48,9 +48,12 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
   private lastEmissionKey = "";
   private lastFailureKey = "";
   private debounceTimer: number | undefined;
+  private debounceFirstScheduledAt: number | null = null;
   private pollingTimer: number | undefined;
   private pollingStopTimer: number | undefined;
   private historyPatched = false;
+  private lastHref = "";
+  private static readonly MAX_DEBOUNCE_WAIT_MS = 3000;
 
   isSupportedPage(): boolean {
     return /^\/(problems|submissions)\//.test(location.pathname);
@@ -135,7 +138,15 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
       window.clearTimeout(this.debounceTimer);
     }
 
+    const now = Date.now();
+    if (this.debounceFirstScheduledAt === null) {
+      this.debounceFirstScheduledAt = now;
+    }
+    const elapsedSinceFirstSchedule = now - this.debounceFirstScheduledAt;
+    const wait = elapsedSinceFirstSchedule >= LeetCodeAdapter.MAX_DEBOUNCE_WAIT_MS ? 0 : 500;
+
     this.debounceTimer = window.setTimeout(() => {
+      this.debounceFirstScheduledAt = null;
       void this.extractSubmission().then((submission) => {
         if (!submission) {
           if (this.isSubmissionPage()) {
@@ -151,7 +162,7 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
         this.stopPolling();
         callback(submission);
       });
-    }, 500);
+    }, wait);
   }
 
   private startPolling(callback: (submission: AcceptedSubmission) => void): void {
@@ -159,12 +170,22 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
       return;
     }
 
+    this.lastHref = location.href;
     this.pollingTimer = window.setInterval(() => {
+      if (location.href !== this.lastHref) {
+        this.lastHref = location.href;
+        this.handleNavigation();
+      }
       this.scheduleAcceptedCheck(callback);
     }, 1500);
 
     this.pollingStopTimer = window.setTimeout(() => {
       this.stopPolling();
+      if (this.isSubmissionPage() && !this.lastEmissionKey) {
+        this.reportExtractionFailure(
+          "CodeTrail stopped waiting for this submission to sync. Refresh the page or resubmit to retry."
+        );
+      }
     }, 5 * 60 * 1000);
   }
 
@@ -312,9 +333,19 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
   }
 
   private extractEditorCode(): string | null {
-    const codeBlock = document.querySelector("pre code, pre")?.textContent?.trimEnd();
-    if (codeBlock && codeBlock.length > 0) {
-      return codeBlock;
+    // Prefer a syntax-highlighted code block (LeetCode tags these with a
+    // "language-xxx" class) over a bare <pre>, since the problem description's
+    // example blocks are also <pre> tags and can otherwise be matched first.
+    const languageTagged = Array.from(document.querySelectorAll<HTMLElement>('code[class*="language-"]')).find(
+      (element) => isVisible(element) && (element.textContent?.trim().length ?? 0) > 0
+    );
+    if (languageTagged) {
+      return extractSyntaxHighlightedCode(languageTagged).trimEnd();
+    }
+
+    const preOrCode = findVisibleWithText(document.querySelectorAll<HTMLElement>("pre code, pre"));
+    if (preOrCode) {
+      return preOrCode.trimEnd();
     }
 
     const textArea = document.querySelector<HTMLTextAreaElement>("textarea.inputarea, textarea")?.value;
@@ -344,7 +375,9 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
   }
 
   private isSubmissionPage(): boolean {
-    return /^\/submissions\//.test(location.pathname);
+    // LeetCode now renders submission results at /problems/{slug}/submissions/{id}/
+    // as well as the legacy top-level /submissions/{id}/ route, so detect either.
+    return this.getSubmissionId() !== null || /^\/submissions\//.test(location.pathname);
   }
 
   private getCurrentQuestionMetadata(): QuestionMetadata {
@@ -461,10 +494,82 @@ function isExtensionContextInvalidated(error: unknown): boolean {
   return error instanceof Error && /Extension context invalidated/i.test(error.message);
 }
 
+// LeetCode ships React apps whose CSS class names and test-id attributes
+// (data-cy, data-e2e-locator) get renamed across deploys, so these DOM
+// helpers lean on things that are stable regardless of markup churn:
+// document.title, meta tags, and known LeetCode language names/slugs.
+const KNOWN_LEETCODE_LANGUAGES: Record<string, string> = {
+  cpp: "C++",
+  java: "Java",
+  python: "Python",
+  python3: "Python3",
+  c: "C",
+  csharp: "C#",
+  javascript: "JavaScript",
+  typescript: "TypeScript",
+  php: "PHP",
+  swift: "Swift",
+  kotlin: "Kotlin",
+  dart: "Dart",
+  golang: "Go",
+  ruby: "Ruby",
+  scala: "Scala",
+  rust: "Rust",
+  racket: "Racket",
+  erlang: "Erlang",
+  elixir: "Elixir",
+  bash: "Bash",
+  mysql: "MySQL",
+  mssql: "MS SQL Server",
+  oraclesql: "Oracle"
+};
+
+function isVisible(element: HTMLElement): boolean {
+  return !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
+}
+
+function findVisibleWithText(elements: NodeListOf<HTMLElement>): string | null {
+  for (const element of Array.from(elements)) {
+    if (!isVisible(element)) {
+      continue;
+    }
+    const text = element.textContent?.trimEnd();
+    if (text && text.trim().length > 0) {
+      return text;
+    }
+  }
+  return null;
+}
+
+// LeetCode renders code via react-syntax-highlighter: each line is a <span>
+// whose first child is a `.linenumber` element and which already ends in its
+// own newline text node. Reading .textContent directly smashes the line-number
+// digits into the code (e.g. "1import java...."), so each line's number node
+// must be stripped before joining; the lines are concatenated directly (no
+// extra separator) since each one already carries its trailing "\n".
+function extractSyntaxHighlightedCode(codeElement: HTMLElement): string {
+  const lineSpans = Array.from(codeElement.children).filter(
+    (child): child is HTMLElement => child.tagName === "SPAN"
+  );
+  if (lineSpans.length === 0) {
+    return codeElement.textContent ?? "";
+  }
+
+  return lineSpans
+    .map((lineSpan) => {
+      const clone = lineSpan.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll(".linenumber, .react-syntax-highlighter-line-number").forEach((node) => node.remove());
+      return clone.textContent ?? "";
+    })
+    .join("");
+}
+
 function extractTitleFromDom(): string | null {
+  const fromDocumentTitle = document.title?.replace(/\s*-\s*LeetCode\s*$/i, "").trim();
   return (
-    document.querySelector<HTMLElement>('[data-cy="question-title"]')?.innerText.trim() ||
+    (fromDocumentTitle && fromDocumentTitle.length > 0 ? fromDocumentTitle : null) ||
     document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.content.replace(/ - LeetCode$/, "").trim() ||
+    document.querySelector<HTMLElement>('[data-cy="question-title"]')?.innerText.trim() ||
     document.querySelector("h1")?.textContent?.trim() ||
     null
   );
@@ -478,13 +583,25 @@ function extractDifficultyFromDom(): string | undefined {
 }
 
 function extractLanguageFromDom(): string | null {
-  const selectors = [
-    '[data-cy="lang-select"]',
-    '[data-e2e-locator="console-submit-lang"]',
-    'button[aria-haspopup="listbox"]',
-    ".monaco-editor"
-  ];
+  const languageTagged = Array.from(document.querySelectorAll<HTMLElement>('code[class*="language-"]')).find(
+    isVisible
+  );
+  const languageSlug = languageTagged?.className.match(/language-([a-z0-9]+)/i)?.[1]?.toLowerCase();
+  if (languageSlug && KNOWN_LEETCODE_LANGUAGES[languageSlug]) {
+    return KNOWN_LEETCODE_LANGUAGES[languageSlug];
+  }
 
+  const knownNames = new Set(Object.values(KNOWN_LEETCODE_LANGUAGES));
+  const buttonMatch = Array.from(document.querySelectorAll<HTMLElement>("button"))
+    .filter(isVisible)
+    .map((button) => button.textContent?.trim())
+    .find((text): text is string => !!text && knownNames.has(text));
+  if (buttonMatch) {
+    return buttonMatch;
+  }
+
+  // Legacy selectors kept as a last resort in case LeetCode restores them.
+  const selectors = ['[data-cy="lang-select"]', '[data-e2e-locator="console-submit-lang"]'];
   for (const selector of selectors) {
     const text = document.querySelector<HTMLElement>(selector)?.innerText?.trim();
     if (text && !/accepted|runtime|memory/i.test(text)) {
