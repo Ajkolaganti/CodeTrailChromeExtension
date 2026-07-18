@@ -108,21 +108,26 @@ async function putWithRetry(
   }
 ): Promise<{ commitSha?: string; contentSha?: string }> {
   let currentInput = { ...input };
+  const maxAttempts = 5;
 
-  for (let attempt = 0; attempt < 5; attempt += 1) {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    // Always re-read the file immediately before writing and use the sha we
+    // just confirmed, rather than a value carried over from an earlier
+    // attempt (or from before this function was even called) — GitHub's
+    // Contents API rejects a write whose sha doesn't match the file's
+    // current blob, and a stale sha is an avoidable cause of that.
+    const existing = await client.getFile(currentInput.owner, currentInput.repo, currentInput.path, currentInput.branch);
+    if (existing?.content === currentInput.content) {
+      return { contentSha: existing.sha };
+    }
+    currentInput = { ...currentInput, sha: existing?.sha };
+
     try {
-      const existing = await client.getFile(currentInput.owner, currentInput.repo, currentInput.path, currentInput.branch);
-      if (existing?.content === currentInput.content) {
-        return { contentSha: existing.sha };
-      }
       return await client.putFile(currentInput);
     } catch (error) {
-      if (!isShaConflict(error) || attempt === 4) {
+      if (!isShaConflict(error) || attempt === maxAttempts - 1) {
         throw error;
       }
-
-      const latest = await client.getFile(currentInput.owner, currentInput.repo, currentInput.path, currentInput.branch);
-      currentInput = { ...currentInput, sha: latest?.sha };
       await delay(150 * (attempt + 1));
     }
   }

@@ -97,17 +97,31 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
   async extractSubmission(): Promise<AcceptedSubmission | null> {
     const currentQuestion = this.getCurrentQuestionMetadata();
     const submissionId = this.getSubmissionId();
-    if (submissionId) {
-      const fromSubmissionPage = await this.fetchSubmissionDetails(submissionId, currentQuestion);
-      if (fromSubmissionPage) {
-        return fromSubmissionPage;
-      }
+
+    if (!submissionId) {
+      // No submission id in the URL means there's no reliable evidence a
+      // fresh submission was just judged on this page. Querying "most recent
+      // accepted submission for this problem" unconditionally here would
+      // re-detect an old, already-synced submission on every unrelated DOM
+      // change (typing, clicking Run, hovering, etc.) and re-trigger a sync
+      // for it, so only trust what's actually visible on screen right now.
+      const domSubmission = this.extractFromDom(currentQuestion);
+      return domSubmission?.code ? domSubmission : null;
+    }
+
+    const fromSubmissionPage = await this.fetchSubmissionDetails(submissionId, currentQuestion);
+    if (fromSubmissionPage) {
+      return fromSubmissionPage;
     }
 
     const slug = currentQuestion.slug;
     const question = slug ? await this.fetchQuestion(slug) : currentQuestion;
 
-    const latestAccepted = await this.fetchLatestAcceptedSubmission(slug, question);
+    // We know exactly which submission this page is showing; only accept a
+    // list-scan match if it resolves to that same id. Accepting whatever is
+    // merely "most recently accepted for this problem" risks resurrecting an
+    // older, already-committed submission and re-queuing it for sync.
+    const latestAccepted = await this.fetchLatestAcceptedSubmission(slug, question, submissionId);
     if (latestAccepted) {
       return latestAccepted;
     }
@@ -117,13 +131,11 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
       return domSubmission;
     }
 
-    if (this.isSubmissionPage()) {
-      this.revealCodeTab();
-      await delay(300);
-      const revealedSubmission = this.extractFromDom(question);
-      if (revealedSubmission?.code) {
-        return revealedSubmission;
-      }
+    this.revealCodeTab();
+    await delay(300);
+    const revealedSubmission = this.extractFromDom(question);
+    if (revealedSubmission?.code) {
+      return revealedSubmission;
     }
 
     return null;
@@ -201,7 +213,11 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
     }
   }
 
-  private async fetchLatestAcceptedSubmission(slug: string, question: QuestionMetadata): Promise<AcceptedSubmission | null> {
+  private async fetchLatestAcceptedSubmission(
+    slug: string,
+    question: QuestionMetadata,
+    expectedSubmissionId?: string
+  ): Promise<AcceptedSubmission | null> {
     const response = await leetcodeGraphql<SubmissionListResponse>({
       query: `query recentSubmissions($titleSlug: String!) {
         questionSubmissionList(questionSlug: $titleSlug, offset: 0, limit: 20) {
@@ -223,6 +239,13 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
     );
 
     if (!accepted?.id) {
+      return null;
+    }
+
+    if (expectedSubmissionId && accepted.id !== expectedSubmissionId) {
+      // The most recent accepted submission on record isn't the one this page
+      // is showing (e.g. the fresh submission hasn't propagated into the list
+      // yet) — don't substitute a different, older submission.
       return null;
     }
 
