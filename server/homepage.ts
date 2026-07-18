@@ -1,5 +1,190 @@
+const SUPPORT_EMAIL = "contact@sidhiratech.com";
+
 export function buildHomepageHtml(): string {
+  return buildPageHtml({
+    title: "CodeTrail | Sync accepted LeetCode submissions to GitHub",
+    description:
+      "CodeTrail captures accepted LeetCode submissions, commits them to GitHub, and keeps a clean portfolio of solved problems.",
+    active: "home",
+    body: `
+      <section class="wrap hero">
+        <div class="hero-copy">
+          <div class="eyebrow">LeetCode to GitHub, without manual cleanup</div>
+          <h1>Turn accepted practice into a polished GitHub portfolio.</h1>
+          <p class="lead">
+            CodeTrail watches for accepted LeetCode submissions, saves the final code, and updates your GitHub repo so your progress is organized, visible, and ready to share.
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="https://github.com/Ajkolaganti/CodeTrailChromeExtension" target="_blank" rel="noreferrer">View on GitHub</a>
+            <a class="btn btn-secondary" href="/support">Support</a>
+          </div>
+          <div class="meta-row" aria-label="Highlights">
+            <span class="meta-pill">Accepted submissions only</span>
+            <span class="meta-pill">GitHub sync</span>
+            <span class="meta-pill">Portfolio README updates</span>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <img class="hero-image" src="/marketing/promo-440x280.png" alt="CodeTrail promotional preview showing submission sync and GitHub portfolio updates" />
+        </div>
+      </section>
+
+      <section class="wrap gallery" aria-label="Product screenshots">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Product preview</p>
+            <h2>What CodeTrail does for you</h2>
+          </div>
+          <p class="section-copy">
+            The extension stays out of the way while you solve. When an answer is accepted, it takes over the repetitive work of storing and organizing that result.
+          </p>
+        </div>
+
+        <div class="gallery-grid">
+          <figure class="shot">
+            <img src="/marketing/promo-440x280.png" alt="CodeTrail promotional preview" />
+            <figcaption>
+              <strong>Sync overview</strong>
+              <span>Accepted runs flow into GitHub with clean commit history and portfolio updates.</span>
+            </figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="/marketing/product-shot.png" alt="CodeTrail dashboard-style screenshot showing waiting, accepted, syncing, and committed states" />
+            <figcaption>
+              <strong>Live status</strong>
+              <span>See when CodeTrail is waiting, syncing, or committed without guessing what happened.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="wrap features" aria-label="Key features">
+        <article class="feature">
+          <span class="feature-mark">01</span>
+          <h3>Capture accepted submissions</h3>
+          <p>CodeTrail detects accepted LeetCode results and keeps only the solved version, not the failed attempts.</p>
+        </article>
+        <article class="feature">
+          <span class="feature-mark">02</span>
+          <h3>Sync to GitHub</h3>
+          <p>Each accepted solution is pushed to a repository you control, with problem-level organization and README updates.</p>
+        </article>
+        <article class="feature">
+          <span class="feature-mark">03</span>
+          <h3>Show progress clearly</h3>
+          <p>Your GitHub repo becomes a structured portfolio of solved problems instead of a pile of loose files.</p>
+        </article>
+      </section>
+
+      <section class="wrap workflow" aria-label="How it works">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Workflow</p>
+            <h2>Simple enough to stay invisible</h2>
+          </div>
+          <p class="section-copy">
+            Install it once, connect GitHub, and let the extension handle the handoff from accepted solution to repository.
+          </p>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <span class="step-number">1</span>
+            <div>
+              <strong>Solve on LeetCode</strong>
+              <p>Work normally on the problem page or submission page.</p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-number">2</span>
+            <div>
+              <strong>Accept and detect</strong>
+              <p>CodeTrail watches for the accepted result and captures the final submission.</p>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step-number">3</span>
+            <div>
+              <strong>Commit and organize</strong>
+              <p>The solution, problem note, and portfolio README are updated in GitHub.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="wrap support-band" aria-label="Support prompt">
+        <div>
+          <p class="section-kicker">Need help?</p>
+          <h2>Support is one email away.</h2>
+          <p class="section-copy">
+            Questions about setup, GitHub connection, or sync behavior go to
+            <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.
+          </p>
+        </div>
+        <div class="support-actions">
+          <a class="btn btn-primary" href="/support">Open support page</a>
+          <a class="btn btn-secondary" href="mailto:${SUPPORT_EMAIL}">Email support</a>
+        </div>
+      </section>
+    `
+  });
+}
+
+export function buildSupportHtml(): string {
+  return buildPageHtml({
+    title: "CodeTrail Support",
+    description:
+      "Get help with CodeTrail setup, GitHub connection, and LeetCode submission sync.",
+    active: "support",
+    body: `
+      <section class="wrap hero support-hero">
+        <div class="hero-copy">
+          <div class="eyebrow">Support</div>
+          <h1>Help with CodeTrail.</h1>
+          <p class="lead">
+            If the extension is not detecting submissions, GitHub login is failing, or you want help with setup, reach out and we will help you get it working.
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="mailto:${SUPPORT_EMAIL}">Email ${SUPPORT_EMAIL}</a>
+            <a class="btn btn-secondary" href="/">Back to home</a>
+          </div>
+        </div>
+
+        <aside class="support-card">
+          <p class="section-kicker">Contact</p>
+          <h2>${SUPPORT_EMAIL}</h2>
+          <p class="support-note">Use this address for setup help, bug reports, or extension upload questions.</p>
+          <div class="support-points">
+            <div>
+              <strong>Common topics</strong>
+              <span>GitHub connect, submission detection, sync status, and Chrome Web Store build questions.</span>
+            </div>
+            <div>
+              <strong>Typical response</strong>
+              <span>We keep replies focused and practical so you can get back to using the extension.</span>
+            </div>
+          </div>
+        </aside>
+      </section>
+    `
+  });
+}
+
+function buildPageHtml({
+  title,
+  description,
+  active,
+  body
+}: {
+  title: string;
+  description: string;
+  active: "home" | "support";
+  body: string;
+}): string {
   const year = new Date().getFullYear();
+  const homeActive = active === "home" ? "active" : "";
+  const supportActive = active === "support" ? "active" : "";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -7,16 +192,12 @@ export function buildHomepageHtml(): string {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark light" />
-    <title>CodeTrail | Sync LeetCode submissions to GitHub</title>
-    <meta
-      name="description"
-      content="CodeTrail is a Chrome extension and OAuth backend that syncs accepted LeetCode submissions to GitHub with a clean portfolio README."
-    />
+    <title>${escapeHtml(title)}</title>
+    <meta name="description" content="${escapeHtml(description)}" />
     <style>
       :root {
         color-scheme: dark;
         --bg: #050816;
-        --bg-2: #091121;
         --panel: rgba(10, 18, 34, 0.84);
         --panel-strong: rgba(14, 24, 42, 0.92);
         --line: rgba(167, 179, 214, 0.14);
@@ -24,11 +205,9 @@ export function buildHomepageHtml(): string {
         --muted: #aeb9d5;
         --accent: #4be37f;
         --accent-2: #57c8ff;
-        --accent-3: #f7c863;
         --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
         --radius: 24px;
       }
-
       * { box-sizing: border-box; }
       html { scroll-behavior: smooth; }
       body {
@@ -39,18 +218,16 @@ export function buildHomepageHtml(): string {
           radial-gradient(900px circle at 85% 18%, rgba(87, 200, 255, 0.08), transparent 32%),
           linear-gradient(180deg, #040712 0%, #060b17 45%, #050816 100%);
         color: var(--text);
-        font: 16px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font: 16px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         text-rendering: optimizeLegibility;
       }
       a { color: inherit; text-decoration: none; }
-      a:focus-visible, button:focus-visible {
+      a:hover { color: #ffffff; }
+      a:focus-visible {
         outline: 3px solid rgba(75, 227, 127, 0.55);
         outline-offset: 3px;
       }
-      .page {
-        position: relative;
-        overflow: hidden;
-      }
+      .page { position: relative; overflow: hidden; }
       .page::before {
         content: "";
         position: fixed;
@@ -98,14 +275,8 @@ export function buildHomepageHtml(): string {
         gap: 2px;
         min-width: 0;
       }
-      .brand-copy strong {
-        font-size: 15px;
-        letter-spacing: 0.01em;
-      }
-      .brand-copy span {
-        color: var(--muted);
-        font-size: 13px;
-      }
+      .brand-copy strong { font-size: 15px; letter-spacing: 0.01em; }
+      .brand-copy span { color: var(--muted); font-size: 13px; }
       .nav {
         display: flex;
         align-items: center;
@@ -115,37 +286,26 @@ export function buildHomepageHtml(): string {
         color: var(--muted);
         font-size: 14px;
       }
-      .nav a:hover { color: var(--text); }
-      .status-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 14px;
-        border: 1px solid rgba(75, 227, 127, 0.2);
-        border-radius: 999px;
-        background: rgba(75, 227, 127, 0.08);
-        color: #d8ffe6;
-        font-size: 13px;
+      .nav a.active {
+        color: #ffffff;
+        text-decoration: underline;
+        text-underline-offset: 6px;
       }
-      .dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 999px;
-        background: var(--accent);
-        box-shadow: 0 0 0 6px rgba(75, 227, 127, 0.12);
-      }
+      .nav a:hover { color: #ffffff; }
       .hero {
         display: grid;
-        grid-template-columns: 1.05fr 0.95fr;
+        grid-template-columns: 1.1fr 0.9fr;
         gap: 28px;
         align-items: center;
-        padding: 72px 0 42px;
+        padding: 76px 0 42px;
       }
-      .eyebrow {
+      .support-hero { grid-template-columns: 1fr 0.9fr; }
+      .eyebrow,
+      .section-kicker {
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        margin-bottom: 18px;
+        margin: 0 0 18px;
         padding: 9px 14px;
         border: 1px solid var(--line);
         border-radius: 999px;
@@ -155,18 +315,48 @@ export function buildHomepageHtml(): string {
       }
       h1 {
         margin: 0;
-        font-size: clamp(3rem, 5vw, 5.25rem);
-        line-height: 0.98;
-        letter-spacing: -0.04em;
-        max-width: 9.5ch;
+        font-size: clamp(3rem, 5vw, 5.4rem);
+        line-height: 0.96;
+        letter-spacing: -0.05em;
+        max-width: 10ch;
+      }
+      h2 {
+        margin: 0;
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+      }
+      h3 {
+        margin: 0;
+        font-size: 1.16rem;
+        line-height: 1.2;
+      }
+      .lead,
+      .section-copy,
+      .support-note,
+      .support-points span,
+      .feature p,
+      .step p {
+        color: var(--muted);
       }
       .lead {
-        margin: 22px 0 0;
+        margin: 20px 0 0;
         max-width: 58ch;
-        color: var(--muted);
         font-size: 1.08rem;
       }
-      .cta-row {
+      .section-heading {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: end;
+        margin: 0 0 18px;
+      }
+      .section-copy {
+        margin: 0;
+        max-width: 50ch;
+      }
+      .cta-row,
+      .support-actions {
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
@@ -176,7 +366,6 @@ export function buildHomepageHtml(): string {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 10px;
         min-height: 48px;
         padding: 0 18px;
         border-radius: 14px;
@@ -200,168 +389,147 @@ export function buildHomepageHtml(): string {
         flex-wrap: wrap;
         gap: 12px;
         margin-top: 18px;
-        color: var(--muted);
-        font-size: 13px;
       }
       .meta-pill {
         padding: 8px 12px;
         border-radius: 999px;
         border: 1px solid var(--line);
         background: rgba(255, 255, 255, 0.02);
-      }
-      .showcase {
-        position: relative;
-        min-height: 640px;
-        border-radius: calc(var(--radius) + 6px);
-        border: 1px solid rgba(167, 179, 214, 0.14);
-        background:
-          linear-gradient(180deg, rgba(12, 20, 37, 0.94), rgba(7, 12, 24, 0.96)),
-          linear-gradient(135deg, rgba(75, 227, 127, 0.08), transparent 45%);
-        box-shadow: var(--shadow);
-        overflow: hidden;
-      }
-      .showcase::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background:
-          radial-gradient(circle at top left, rgba(75, 227, 127, 0.12), transparent 32%),
-          radial-gradient(circle at 78% 18%, rgba(87, 200, 255, 0.12), transparent 26%);
-      }
-      .showcase-inner {
-        position: relative;
-        display: grid;
-        gap: 16px;
-        padding: 24px;
-      }
-      .panel {
-        border: 1px solid rgba(167, 179, 214, 0.14);
-        background: rgba(6, 11, 22, 0.74);
-        border-radius: 20px;
-        overflow: hidden;
-      }
-      .panel-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 16px 18px;
-        border-bottom: 1px solid rgba(167, 179, 214, 0.08);
-      }
-      .panel-head strong {
-        font-size: 14px;
-        letter-spacing: 0.02em;
-      }
-      .status {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        border-radius: 999px;
-        background: rgba(75, 227, 127, 0.09);
-        color: #d8ffe6;
-        font-size: 12px;
-      }
-      .sync-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 12px;
-        padding: 18px;
-      }
-      .sync-line {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        align-items: center;
-        gap: 12px;
-        padding: 14px 16px;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(167, 179, 214, 0.1);
-      }
-      .sync-badge {
-        width: 34px;
-        height: 34px;
-        border-radius: 11px;
-        display: grid;
-        place-items: center;
-        background: rgba(75, 227, 127, 0.12);
-        color: var(--accent);
-        font-weight: 700;
-      }
-      .sync-line h3 {
-        margin: 0;
-        font-size: 14px;
-      }
-      .sync-line p {
-        margin: 3px 0 0;
         color: var(--muted);
         font-size: 13px;
       }
-      .sync-pill {
-        padding: 8px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(87, 200, 255, 0.18);
-        background: rgba(87, 200, 255, 0.08);
-        color: #d5f1ff;
-        font-size: 12px;
-        white-space: nowrap;
+      .hero-visual {
+        display: grid;
+        place-items: center;
       }
-      .code-card {
-        padding: 18px;
-        margin-top: 8px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 12px;
-        line-height: 1.75;
-        color: #dbe6ff;
+      .hero-image {
+        width: 100%;
+        max-width: 620px;
+        aspect-ratio: 440 / 280;
+        object-fit: cover;
+        border-radius: 22px;
+        border: 1px solid rgba(167, 179, 214, 0.14);
+        box-shadow: var(--shadow);
+        background: rgba(255, 255, 255, 0.02);
       }
-      .code-card .dim { color: #7d8ba9; }
-      .feature-band {
+      .gallery,
+      .features,
+      .workflow {
+        padding: 30px 0 8px;
+      }
+      .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .shot {
+        margin: 0;
+        border-radius: var(--radius);
+        border: 1px solid rgba(167, 179, 214, 0.14);
+        background: rgba(255, 255, 255, 0.03);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+      }
+      .shot img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 440 / 280;
+        object-fit: cover;
+      }
+      .shot figcaption {
+        display: grid;
+        gap: 6px;
+        padding: 16px 18px 18px;
+      }
+      .shot strong { font-size: 15px; }
+      .shot span { color: var(--muted); font-size: 14px; }
+      .features {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 14px;
-        padding: 18px 0 34px;
+        gap: 16px;
       }
       .feature {
-        border-top: 1px solid rgba(167, 179, 214, 0.14);
-        padding-top: 18px;
-      }
-      .feature strong {
-        display: block;
-        font-size: 16px;
-        margin-bottom: 6px;
-      }
-      .feature p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 14px;
-      }
-      .stats {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 14px;
-        padding: 14px 0 54px;
-      }
-      .stat {
-        padding: 18px;
+        padding: 20px;
         border-radius: var(--radius);
         border: 1px solid rgba(167, 179, 214, 0.14);
         background: rgba(255, 255, 255, 0.03);
       }
-      .stat .label {
-        color: var(--muted);
-        font-size: 13px;
+      .feature-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        margin-bottom: 14px;
+        background: rgba(75, 227, 127, 0.12);
+        color: #d8ffe6;
+        font-weight: 700;
       }
-      .stat .value {
-        display: block;
+      .feature p { margin: 10px 0 0; }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .step {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        align-items: start;
+        padding: 20px;
+        border-radius: var(--radius);
+        border: 1px solid rgba(167, 179, 214, 0.14);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .step-number {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        background: rgba(87, 200, 255, 0.11);
+        color: #d5f1ff;
+        font-weight: 700;
+      }
+      .step p { margin: 10px 0 0; }
+      .support-band {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin: 36px 0 46px;
+        padding: 22px 24px;
+        border-radius: calc(var(--radius) + 4px);
+        border: 1px solid rgba(167, 179, 214, 0.14);
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .support-band .section-copy {
+        max-width: 58ch;
+      }
+      .support-card {
+        padding: 24px;
+        border-radius: calc(var(--radius) + 4px);
+        border: 1px solid rgba(167, 179, 214, 0.14);
+        background: rgba(255, 255, 255, 0.03);
+        box-shadow: var(--shadow);
+      }
+      .support-card h2 {
         margin-top: 10px;
-        font-size: clamp(1.8rem, 3vw, 2.5rem);
-        letter-spacing: -0.04em;
+        font-size: clamp(1.7rem, 2.8vw, 2.2rem);
       }
-      .stat .note {
+      .support-note {
+        margin: 12px 0 0;
+      }
+      .support-points {
+        display: grid;
+        gap: 16px;
+        margin-top: 18px;
+      }
+      .support-points strong {
         display: block;
-        margin-top: 8px;
-        color: var(--muted);
-        font-size: 13px;
+        margin-bottom: 4px;
+        font-size: 14px;
       }
       .footer {
         padding: 18px 0 34px;
@@ -373,23 +541,32 @@ export function buildHomepageHtml(): string {
         flex-wrap: wrap;
         border-top: 1px solid rgba(167, 179, 214, 0.08);
       }
-      .footer a:hover { color: var(--text); }
-      @media (max-width: 920px) {
+      @media (max-width: 960px) {
         .hero,
-        .feature-band,
-        .stats {
+        .gallery-grid,
+        .features,
+        .steps,
+        .support-band {
           grid-template-columns: 1fr;
         }
-        .showcase {
-          min-height: 0;
+        .section-heading {
+          display: grid;
+        }
+        .hero,
+        .gallery,
+        .features,
+        .workflow {
+          padding-top: 42px;
+        }
+        .support-band {
+          display: grid;
+          align-items: start;
         }
         .topbar-inner {
-          align-items: flex-start;
           flex-direction: column;
+          align-items: flex-start;
         }
-        h1 {
-          max-width: none;
-        }
+        h1 { max-width: none; }
       }
       @media (prefers-reduced-motion: reduce) {
         html { scroll-behavior: auto; }
@@ -406,125 +583,35 @@ export function buildHomepageHtml(): string {
             <img src="/icon.svg" alt="" />
             <span class="brand-copy">
               <strong>CodeTrail</strong>
-              <span>LeetCode to GitHub sync for accepted submissions</span>
+              <span>Accepted LeetCode submissions, organized in GitHub</span>
             </span>
           </a>
           <nav class="nav" aria-label="Primary">
-            <a href="#features">Features</a>
-            <a href="#workflow">Workflow</a>
+            <a class="${homeActive}" href="/">Home</a>
+            <a class="${supportActive}" href="/support">Support</a>
             <a href="https://github.com/Ajkolaganti/CodeTrailChromeExtension" target="_blank" rel="noreferrer">GitHub</a>
-            <span class="status-chip"><span class="dot"></span>Backend live on Railway</span>
           </nav>
         </div>
       </header>
 
       <main>
-        <section class="wrap hero">
-          <div>
-            <div class="eyebrow">Chrome extension + production OAuth backend</div>
-            <h1>Ship accepted LeetCode work into GitHub.</h1>
-            <p class="lead">
-              CodeTrail watches for accepted submissions, captures the final code and metadata, and pushes them into a clean GitHub portfolio repo with README updates and retry handling.
-            </p>
-            <div class="cta-row">
-              <a class="btn btn-primary" href="https://github.com/Ajkolaganti/CodeTrailChromeExtension" target="_blank" rel="noreferrer">View source</a>
-              <a class="btn btn-secondary" href="/health">Check backend health</a>
-            </div>
-            <div class="meta-row" aria-label="Highlights">
-              <span class="meta-pill">LeetCode detection</span>
-              <span class="meta-pill">GitHub OAuth exchange</span>
-              <span class="meta-pill">README portfolio sync</span>
-            </div>
-          </div>
-
-          <div class="showcase" aria-label="CodeTrail product preview">
-            <div class="showcase-inner">
-              <div class="panel">
-                <div class="panel-head">
-                  <strong>Sync pipeline</strong>
-                  <span class="status"><span class="dot"></span>Processing accepted submission</span>
-                </div>
-                <div class="sync-grid">
-                  <div class="sync-line">
-                    <div class="sync-badge">1</div>
-                    <div>
-                      <h3>Detect accepted run</h3>
-                      <p>Observe LeetCode and capture the final accepted submission.</p>
-                    </div>
-                    <span class="sync-pill">LeetCode</span>
-                  </div>
-                  <div class="sync-line">
-                    <div class="sync-badge">2</div>
-                    <div>
-                      <h3>Exchange GitHub token</h3>
-                      <p>Use the Railway-hosted backend to complete OAuth securely.</p>
-                    </div>
-                    <span class="sync-pill">OAuth backend</span>
-                  </div>
-                  <div class="sync-line">
-                    <div class="sync-badge">3</div>
-                    <div>
-                      <h3>Commit and update README</h3>
-                      <p>Write the solution file, problem README, and portfolio index.</p>
-                    </div>
-                    <span class="sync-pill">GitHub repo</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="panel code-card">
-                <div><span class="dim">status</span> &nbsp; accepted_detected</div>
-                <div><span class="dim">queue</span> &nbsp; pending → syncing → committed</div>
-                <div><span class="dim">repo</span> &nbsp; /solutions/medium/median-of-two-sorted-arrays.ts</div>
-                <div><span class="dim">readme</span> &nbsp; README.md updated with new submission</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="features" class="wrap feature-band" aria-label="Features">
-          <div class="feature">
-            <strong>Quiet by default</strong>
-            <p>No hinting, autocomplete, or distraction while you solve. It only reacts after acceptance.</p>
-          </div>
-          <div class="feature">
-            <strong>Resilient sync</strong>
-            <p>Queueing, retries, SHA conflict handling, and backend notifications keep the pipeline moving.</p>
-          </div>
-          <div class="feature">
-            <strong>Portfolio-ready output</strong>
-            <p>Every accepted submission updates the problem file and a structured README portfolio page.</p>
-          </div>
-        </section>
-
-        <section id="workflow" class="wrap stats" aria-label="Workflow summary">
-          <div class="stat">
-            <span class="label">Capture</span>
-            <strong class="value">LeetCode</strong>
-            <span class="note">Detects accepted submissions and normalizes the metadata.</span>
-          </div>
-          <div class="stat">
-            <span class="label">Commit</span>
-            <strong class="value">GitHub</strong>
-            <span class="note">Writes code, problem notes, and portfolio README updates.</span>
-          </div>
-          <div class="stat">
-            <span class="label">Deploy</span>
-            <strong class="value">Railway</strong>
-            <span class="note">The OAuth exchange backend runs on the same production service.</span>
-          </div>
-        </section>
+        ${body}
 
         <footer class="wrap footer">
           <span>© ${year} CodeTrail</span>
-          <span>
-            <a href="https://github.com/Ajkolaganti/CodeTrailChromeExtension" target="_blank" rel="noreferrer">Repository</a>
-            &nbsp;·&nbsp;
-            <a href="/health">Health</a>
-          </span>
+          <span><a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></span>
         </footer>
       </main>
     </div>
   </body>
 </html>`;
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }

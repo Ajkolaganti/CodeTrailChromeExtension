@@ -15,7 +15,7 @@
     "https://leetcode.com/*",
     "https://*.leetcode.com/*",
     "https://api.github.com/*",
-    "http://localhost:8787/*"
+    "https://codetrailchromeextension-production.up.railway.app/*"
   ],
   "background": {
     "service_worker": "assets/background.js",
