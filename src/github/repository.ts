@@ -14,81 +14,85 @@ export interface SyncResult {
   syncedSolution?: SyncedSolution;
 }
 
+let repositorySyncQueue: Promise<void> = Promise.resolve();
+
 export async function syncSubmissionToRepository(
   client: GitHubClient,
   settings: CodeTrailSettings,
   submission: AcceptedSubmission,
   syncedSolutions: SyncedSolution[]
 ): Promise<SyncResult> {
-  const repository = settings.selectedRepository;
-  if (!repository) {
-    throw new Error("Select a GitHub repository before syncing.");
-  }
+  return runSerialized(async () => {
+    const repository = settings.selectedRepository;
+    if (!repository) {
+      throw new Error("Select a GitHub repository before syncing.");
+    }
 
-  const branch = settings.defaultBranch || repository.defaultBranch || "main";
-  const [owner, repo] = repository.fullName.split("/");
-  if (!owner || !repo) {
-    throw new Error("Selected repository is invalid.");
-  }
+    const branch = settings.defaultBranch || repository.defaultBranch || "main";
+    const [owner, repo] = repository.fullName.split("/");
+    if (!owner || !repo) {
+      throw new Error("Selected repository is invalid.");
+    }
 
-  const solutionPath = getSolutionPath(submission);
-  const readmePath = getProblemReadmePath(submission);
-  const desiredSolutionContent = `${submission.code}\n`;
-  const existingSolution = await client.getFile(owner, repo, solutionPath, branch);
+    const solutionPath = getSolutionPath(submission);
+    const readmePath = getProblemReadmePath(submission);
+    const desiredSolutionContent = `${submission.code}\n`;
+    const existingSolution = await client.getFile(owner, repo, solutionPath, branch);
 
-  if (existingSolution && settings.duplicateBehavior === "skip") {
-    return { status: "skipped", solutionPath, readmePath };
-  }
+    if (existingSolution && settings.duplicateBehavior === "skip") {
+      return { status: "skipped", solutionPath, readmePath };
+    }
 
-  const solutionWrite = await putWithRetry(client, {
-    owner,
-    repo,
-    path: solutionPath,
-    content: desiredSolutionContent,
-    message: getCommitMessage(submission, Boolean(existingSolution)),
-    branch,
-    sha: existingSolution?.sha
+    const solutionWrite = await putWithRetry(client, {
+      owner,
+      repo,
+      path: solutionPath,
+      content: desiredSolutionContent,
+      message: getCommitMessage(submission, Boolean(existingSolution)),
+      branch,
+      sha: existingSolution?.sha
+    });
+
+    const existingProblemReadme = await client.getFile(owner, repo, readmePath, branch);
+    await putWithRetry(client, {
+      owner,
+      repo,
+      path: readmePath,
+      content: generateProblemReadme(submission),
+      message: `Document ${submission.problemTitle}`,
+      branch,
+      sha: existingProblemReadme?.sha
+    });
+
+    const syncedSolution: SyncedSolution = {
+      key: createSubmissionKey(submission),
+      submission,
+      solutionPath,
+      readmePath,
+      syncedAt: toIsoDate(),
+      commitSha: solutionWrite.commitSha
+    };
+
+    const existingReadme = await client.getFile(owner, repo, "README.md", branch);
+    const nextReadme = generateMainReadme([syncedSolution, ...syncedSolutions.filter((item) => item.key !== syncedSolution.key)]);
+    await putWithRetry(client, {
+      owner,
+      repo,
+      path: "README.md",
+      content: nextReadme,
+      message: "Update CodeTrail portfolio README",
+      branch,
+      sha: existingReadme?.sha
+    });
+
+    return {
+      status: existingSolution ? "updated" : "created",
+      solutionPath,
+      readmePath,
+      commitSha: solutionWrite.commitSha,
+      syncedSolution
+    };
   });
-
-  const existingProblemReadme = await client.getFile(owner, repo, readmePath, branch);
-  await putWithRetry(client, {
-    owner,
-    repo,
-    path: readmePath,
-    content: generateProblemReadme(submission),
-    message: `Document ${submission.problemTitle}`,
-    branch,
-    sha: existingProblemReadme?.sha
-  });
-
-  const syncedSolution: SyncedSolution = {
-    key: createSubmissionKey(submission),
-    submission,
-    solutionPath,
-    readmePath,
-    syncedAt: toIsoDate(),
-    commitSha: solutionWrite.commitSha
-  };
-
-  const existingReadme = await client.getFile(owner, repo, "README.md", branch);
-  const nextReadme = generateMainReadme([syncedSolution, ...syncedSolutions.filter((item) => item.key !== syncedSolution.key)]);
-  await putWithRetry(client, {
-    owner,
-    repo,
-    path: "README.md",
-    content: nextReadme,
-    message: "Update CodeTrail portfolio README",
-    branch,
-    sha: existingReadme?.sha
-  });
-
-  return {
-    status: existingSolution ? "updated" : "created",
-    solutionPath,
-    readmePath,
-    commitSha: solutionWrite.commitSha,
-    syncedSolution
-  };
 }
 
 async function putWithRetry(
@@ -132,6 +136,22 @@ function isShaConflict(error: unknown): boolean {
     (error.status === 409 || error.status === 422) &&
     /sha|does not match|exists/i.test(error.message)
   );
+}
+
+function runSerialized<T>(operation: () => Promise<T>): Promise<T> {
+  const previous = repositorySyncQueue;
+  let releaseCurrent!: () => void;
+
+  repositorySyncQueue = new Promise<void>((resolve) => {
+    releaseCurrent = resolve;
+  });
+
+  return previous
+    .catch(() => undefined)
+    .then(() => operation())
+    .finally(() => {
+      releaseCurrent();
+    });
 }
 
 function delay(ms: number): Promise<void> {
