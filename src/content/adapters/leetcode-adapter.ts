@@ -48,6 +48,8 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
   private lastEmissionKey = "";
   private lastFailureKey = "";
   private debounceTimer: number | undefined;
+  private pollingTimer: number | undefined;
+  private pollingStopTimer: number | undefined;
   private historyPatched = false;
 
   isSupportedPage(): boolean {
@@ -60,6 +62,7 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
     }
 
     this.patchHistory();
+    this.startPolling(callback);
 
     const observer = new MutationObserver(() => {
       this.scheduleAcceptedCheck(callback);
@@ -84,6 +87,7 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
       if (this.debounceTimer) {
         window.clearTimeout(this.debounceTimer);
       }
+      this.stopPolling();
     };
   }
 
@@ -144,9 +148,36 @@ export class LeetCodeAdapter implements CodingPlatformAdapter {
           return;
         }
         this.lastEmissionKey = key;
+        this.stopPolling();
         callback(submission);
       });
     }, 500);
+  }
+
+  private startPolling(callback: (submission: AcceptedSubmission) => void): void {
+    if (this.pollingTimer || !this.isSupportedPage()) {
+      return;
+    }
+
+    this.pollingTimer = window.setInterval(() => {
+      this.scheduleAcceptedCheck(callback);
+    }, 1500);
+
+    this.pollingStopTimer = window.setTimeout(() => {
+      this.stopPolling();
+    }, 45000);
+  }
+
+  private stopPolling(): void {
+    if (this.pollingTimer) {
+      window.clearInterval(this.pollingTimer);
+      this.pollingTimer = undefined;
+    }
+
+    if (this.pollingStopTimer) {
+      window.clearTimeout(this.pollingStopTimer);
+      this.pollingStopTimer = undefined;
+    }
   }
 
   private async fetchLatestAcceptedSubmission(slug: string, question: QuestionMetadata): Promise<AcceptedSubmission | null> {

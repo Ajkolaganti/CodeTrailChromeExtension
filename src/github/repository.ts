@@ -33,6 +33,7 @@ export async function syncSubmissionToRepository(
 
   const solutionPath = getSolutionPath(submission);
   const readmePath = getProblemReadmePath(submission);
+  const desiredSolutionContent = `${submission.code}\n`;
   const existingSolution = await client.getFile(owner, repo, solutionPath, branch);
 
   if (existingSolution && settings.duplicateBehavior === "skip") {
@@ -43,7 +44,7 @@ export async function syncSubmissionToRepository(
     owner,
     repo,
     path: solutionPath,
-    content: `${submission.code}\n`,
+    content: desiredSolutionContent,
     message: getCommitMessage(submission, Boolean(existingSolution)),
     branch,
     sha: existingSolution?.sha
@@ -104,16 +105,21 @@ async function putWithRetry(
 ): Promise<{ commitSha?: string; contentSha?: string }> {
   let currentInput = { ...input };
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
     try {
+      const existing = await client.getFile(currentInput.owner, currentInput.repo, currentInput.path, currentInput.branch);
+      if (existing?.content === currentInput.content) {
+        return { contentSha: existing.sha };
+      }
       return await client.putFile(currentInput);
     } catch (error) {
-      if (!isShaConflict(error) || attempt === 1) {
+      if (!isShaConflict(error) || attempt === 4) {
         throw error;
       }
 
       const latest = await client.getFile(currentInput.owner, currentInput.repo, currentInput.path, currentInput.branch);
       currentInput = { ...currentInput, sha: latest?.sha };
+      await delay(150 * (attempt + 1));
     }
   }
 
@@ -126,4 +132,10 @@ function isShaConflict(error: unknown): boolean {
     (error.status === 409 || error.status === 422) &&
     /sha|does not match|exists/i.test(error.message)
   );
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    globalThis.setTimeout(resolve, ms);
+  });
 }
