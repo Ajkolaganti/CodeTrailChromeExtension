@@ -1,8 +1,11 @@
 import "dotenv/config";
 import express from "express";
+import { buildHomepageHtml } from "./homepage";
 
 const app = express();
 const port = Number(process.env.PORT ?? 8787);
+
+app.use(express.static("public"));
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -23,6 +26,10 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json({ limit: "32kb" }));
+
+app.get("/", (_req, res) => {
+  res.type("html").send(buildHomepageHtml());
+});
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
