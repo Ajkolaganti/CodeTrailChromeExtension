@@ -89,6 +89,12 @@ function PopupApp() {
   }, [snapshot]);
 
   useEffect(() => {
+    if (snapshot?.auth && repositories.length === 0 && !busy) {
+      void loadRepositories();
+    }
+  }, [snapshot?.auth, repositories.length, busy]);
+
+  useEffect(() => {
     if (!toast) return undefined;
     const timeout = window.setTimeout(() => setToast(null), 3000);
     return () => window.clearTimeout(timeout);

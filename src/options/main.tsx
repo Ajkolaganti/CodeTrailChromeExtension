@@ -45,6 +45,12 @@ function OptionsApp() {
     if (snapshot) applyTheme(snapshot.settings.theme);
   }, [snapshot]);
 
+  useEffect(() => {
+    if (snapshot?.auth && repositories.length === 0 && !busy) {
+      void loadRepositories();
+    }
+  }, [snapshot?.auth, repositories.length, busy]);
+
   async function refresh() {
     setSnapshot(await sendMessage<RuntimeSnapshot>({ type: "GET_RUNTIME_SNAPSHOT" }));
   }

@@ -3,7 +3,7 @@ import { saveAuthState } from "../storage/settings";
 import { GitHubClient } from "./client";
 
 const GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize";
-const DEFAULT_BACKEND_URL = "http://localhost:8787";
+const DEFAULT_BACKEND_URL = "https://codetrailchromeextension-production.up.railway.app";
 const DEFAULT_SCOPE = "public_repo";
 
 interface TokenExchangeResponse {
@@ -62,11 +62,16 @@ export async function connectGitHub(): Promise<AuthState> {
 
 async function exchangeCode(code: string, redirectUri: string): Promise<Required<Pick<TokenExchangeResponse, "access_token">> & TokenExchangeResponse> {
   const backendUrl = (import.meta.env.VITE_OAUTH_BACKEND_URL as string | undefined) || DEFAULT_BACKEND_URL;
-  const response = await fetch(`${backendUrl.replace(/\/$/, "")}/api/github/oauth/exchange`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code, redirectUri })
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${backendUrl.replace(/\/$/, "")}/api/github/oauth/exchange`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, redirectUri })
+    });
+  } catch {
+    throw new Error(`Unable to reach the GitHub OAuth backend at ${backendUrl}. Check the Railway URL and CORS settings.`);
+  }
 
   const body = (await response.json()) as TokenExchangeResponse;
   if (!response.ok || !body.access_token) {
