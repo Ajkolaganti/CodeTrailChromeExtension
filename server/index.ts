@@ -4,20 +4,20 @@ import express from "express";
 
 const app = express();
 const port = Number(process.env.PORT ?? 8787);
+const corsOptions = {
+  origin(origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) {
+    const allowed = getAllowedOrigins();
+    if (!origin || allowed.includes(origin) || /^chrome-extension:\/\/[a-z]{32}$/.test(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error("Origin is not allowed."));
+  }
+};
 
 app.use(express.json({ limit: "32kb" }));
-app.use(
-  cors({
-    origin(origin, callback) {
-      const allowed = getAllowedOrigins();
-      if (!origin || allowed.includes(origin) || /^chrome-extension:\/\/[a-z]{32}$/.test(origin)) {
-        callback(null, true);
-        return;
-      }
-      callback(new Error("Origin is not allowed."));
-    }
-  })
-);
+app.use(cors(corsOptions));
+app.options("/api/github/oauth/exchange", cors(corsOptions));
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true });
