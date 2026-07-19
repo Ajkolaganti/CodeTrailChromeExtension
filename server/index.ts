@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import { buildHomepageHtml, buildSupportHtml } from "./homepage";
+import { buildHomepageHtml, buildPrivacyHtml, buildSupportHtml } from "./homepage";
 
 const app = express();
 const port = Number(process.env.PORT ?? 8787);
@@ -33,6 +33,10 @@ app.get("/", (_req, res) => {
 
 app.get("/support", (_req, res) => {
   res.type("html").send(buildSupportHtml());
+});
+
+app.get("/privacy", (_req, res) => {
+  res.type("html").send(buildPrivacyHtml());
 });
 
 app.get("/health", (_req, res) => {

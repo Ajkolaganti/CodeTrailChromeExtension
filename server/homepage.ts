@@ -171,6 +171,135 @@ export function buildSupportHtml(): string {
   });
 }
 
+export function buildPrivacyHtml(): string {
+  return buildPageHtml({
+    title: "CodeTrail Privacy Policy",
+    description:
+      "Privacy policy for CodeTrail Chrome extension and OAuth backend, including what data is collected, how it is used, and who it is shared with.",
+    active: "privacy",
+    body: `
+      <section class="wrap legal-hero">
+        <div class="hero-copy">
+          <div class="eyebrow">Privacy Policy</div>
+          <h1>How CodeTrail handles data.</h1>
+          <p class="lead">
+            This page explains what information CodeTrail handles, why it handles that information, where it is stored, and who it is shared with. It is written to match the actual behavior of the extension and backend.
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="mailto:${SUPPORT_EMAIL}">Contact ${SUPPORT_EMAIL}</a>
+            <a class="btn btn-secondary" href="/">Back to home</a>
+          </div>
+        </div>
+
+        <aside class="support-card">
+          <p class="section-kicker">Short version</p>
+          <h2>CodeTrail only handles the data required to sync accepted LeetCode submissions to GitHub.</h2>
+          <p class="support-note">
+            It does not sell personal data, does not use data for advertising, and does not intentionally collect browsing history or unrelated personal information.
+          </p>
+        </aside>
+      </section>
+
+      <section class="wrap legal-grid" aria-label="Privacy details">
+        <article class="legal-card">
+          <h2>1. What CodeTrail collects</h2>
+          <p>CodeTrail handles the following categories of information when you use the extension:</p>
+          <ul>
+            <li><strong>LeetCode submission data:</strong> problem title, problem slug, problem URL, difficulty, language, submitted code, runtime, memory, and submission timestamp.</li>
+            <li><strong>GitHub account and repository data:</strong> GitHub account profile information returned by GitHub, repository names, repository URLs, default branch, and repository selection settings.</li>
+            <li><strong>Authentication data:</strong> GitHub OAuth access token, token type, scope, and authentication timestamp.</li>
+            <li><strong>Local extension data:</strong> user settings, sync queue state, sync status, last error text, and previously synced submission metadata.</li>
+            <li><strong>Operational page data:</strong> the LeetCode page route and limited page content needed to detect accepted submissions and extract the final answer.</li>
+          </ul>
+        </article>
+
+        <article class="legal-card">
+          <h2>2. How CodeTrail uses data</h2>
+          <p>CodeTrail uses the data above only for the product purpose you chose:</p>
+          <ul>
+            <li>Detect accepted LeetCode submissions.</li>
+            <li>Authenticate with GitHub through OAuth.</li>
+            <li>Write solution files and README updates to the GitHub repository you selected.</li>
+            <li>Show sync status, errors, badges, and notifications in the extension UI.</li>
+            <li>Store settings, queue state, and synced history locally so the extension can continue working across sessions.</li>
+          </ul>
+        </article>
+
+        <article class="legal-card">
+          <h2>3. Where data is stored</h2>
+          <p>Data is stored in the following places:</p>
+          <ul>
+            <li><strong>Chrome local storage:</strong> extension settings, auth state, queue data, sync status, and synced submission metadata.</li>
+            <li><strong>GitHub:</strong> accepted submissions and README entries are written to the repository you selected.</li>
+            <li><strong>LeetCode:</strong> the extension reads publicly available or authenticated page and GraphQL data from LeetCode to detect accepted submissions.</li>
+            <li><strong>Railway OAuth backend:</strong> receives the GitHub OAuth authorization code and redirect URI so it can exchange the code for an access token. It is not used to store your LeetCode solutions.</li>
+          </ul>
+        </article>
+
+        <article class="legal-card">
+          <h2>4. What we do not collect</h2>
+          <p>CodeTrail does not intentionally collect or use:</p>
+          <ul>
+            <li>Google or GitHub passwords.</li>
+            <li>Payment or financial data.</li>
+            <li>Contacts, calendar data, microphone, camera, or physical location data.</li>
+            <li>General browsing history or unrelated websites.</li>
+            <li>Analytics, ad targeting identifiers, or advertising profiles.</li>
+          </ul>
+        </article>
+
+        <article class="legal-card">
+          <h2>5. Sharing and third parties</h2>
+          <p>CodeTrail only shares information with services required to provide the extension:</p>
+          <ul>
+            <li><strong>GitHub:</strong> for OAuth authentication and repository writes that you explicitly initiate or enable.</li>
+            <li><strong>LeetCode:</strong> for reading submission details and problem metadata required to detect an accepted solution.</li>
+            <li><strong>Railway OAuth backend:</strong> for exchanging the GitHub OAuth authorization code for an access token.</li>
+          </ul>
+          <p>CodeTrail does not sell user data, does not share user data with advertising networks or data brokers, and does not use user data for targeted advertising.</p>
+        </article>
+
+        <article class="legal-card">
+          <h2>6. Security</h2>
+          <p>CodeTrail uses HTTPS for external network requests where supported by the destination service. GitHub access tokens are stored locally in Chrome storage for the extension session and are not intentionally disclosed publicly. The backend keeps the GitHub client secret server-side and does not bundle it into the extension.</p>
+        </article>
+
+        <article class="legal-card">
+          <h2>7. Retention and deletion</h2>
+          <p>Your local extension data stays on your device until you remove it. You can clear stored settings, auth state, queues, and synced history from the extension UI. If you want GitHub repository content removed, you must delete it from GitHub directly or ask us for help.</p>
+        </article>
+
+        <article class="legal-card">
+          <h2>8. Permissions</h2>
+          <p>CodeTrail requests permissions only for the features it provides:</p>
+          <ul>
+            <li><strong>storage:</strong> save settings, queue state, and sync history locally.</li>
+            <li><strong>identity:</strong> complete the GitHub OAuth flow through Chrome.</li>
+            <li><strong>notifications:</strong> show sync success or failure updates.</li>
+            <li><strong>LeetCode host access:</strong> detect accepted submissions and read the final submission details.</li>
+            <li><strong>GitHub API access:</strong> fetch account and repository data and write synced files.</li>
+          </ul>
+        </article>
+
+        <article class="legal-card">
+          <h2>9. Children and eligibility</h2>
+          <p>CodeTrail is intended for general use by people who can install browser extensions and connect a GitHub account. It is not directed at children.</p>
+        </article>
+
+        <article class="legal-card">
+          <h2>10. Changes to this policy</h2>
+          <p>If CodeTrail changes how it handles data, this page will be updated so it continues to match the extension’s actual behavior. Continued use after an update means the revised policy applies.</p>
+        </article>
+
+        <article class="legal-card">
+          <h2>11. Contact</h2>
+          <p>Questions about this policy or CodeTrail data handling can be sent to <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.</p>
+        </article>
+      </section>
+    `
+  });
+}
+
 function buildPageHtml({
   title,
   description,
@@ -179,7 +308,7 @@ function buildPageHtml({
 }: {
   title: string;
   description: string;
-  active: "home" | "support";
+  active: "home" | "support" | "privacy";
   body: string;
 }): string {
   const year = new Date().getFullYear();
@@ -514,6 +643,39 @@ function buildPageHtml({
         background: rgba(255, 255, 255, 0.03);
         box-shadow: var(--shadow);
       }
+      .legal-hero {
+        display: grid;
+        grid-template-columns: 1fr 0.9fr;
+        gap: 28px;
+        align-items: start;
+        padding: 76px 0 28px;
+      }
+      .legal-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        padding: 10px 0 40px;
+      }
+      .legal-card {
+        padding: 22px;
+        border-radius: var(--radius);
+        border: 1px solid rgba(167, 179, 214, 0.14);
+        background: rgba(255, 255, 255, 0.03);
+        box-shadow: var(--shadow);
+      }
+      .legal-card h2 {
+        margin-bottom: 10px;
+        font-size: 1.35rem;
+      }
+      .legal-card p {
+        margin: 0 0 10px;
+      }
+      .legal-card ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+      }
+      .legal-card li + li { margin-top: 8px; }
       .support-card h2 {
         margin-top: 10px;
         font-size: clamp(1.7rem, 2.8vw, 2.2rem);
@@ -543,7 +705,9 @@ function buildPageHtml({
       }
       @media (max-width: 960px) {
         .hero,
+        .legal-hero,
         .gallery-grid,
+        .legal-grid,
         .features,
         .steps,
         .support-band {
@@ -551,6 +715,9 @@ function buildPageHtml({
         }
         .section-heading {
           display: grid;
+        }
+        .legal-hero {
+          padding-top: 42px;
         }
         .hero,
         .gallery,
@@ -589,6 +756,7 @@ function buildPageHtml({
           <nav class="nav" aria-label="Primary">
             <a class="${homeActive}" href="/">Home</a>
             <a class="${supportActive}" href="/support">Support</a>
+            <a class="${active === "privacy" ? "active" : ""}" href="/privacy">Privacy</a>
             <a href="https://github.com/Ajkolaganti/CodeTrailChromeExtension" target="_blank" rel="noreferrer">GitHub</a>
           </nav>
         </div>
@@ -599,7 +767,7 @@ function buildPageHtml({
 
         <footer class="wrap footer">
           <span>© ${year} CodeTrail</span>
-          <span><a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></span>
+          <span><a href="/privacy">Privacy Policy</a> · <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></span>
         </footer>
       </main>
     </div>
