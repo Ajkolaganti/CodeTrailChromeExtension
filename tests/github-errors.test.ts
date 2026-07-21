@@ -13,4 +13,14 @@ describe("GitHub error handling", () => {
     expect(error.isRateLimit).toBe(true);
     expect(error.isRecoverable).toBe(true);
   });
+
+  it("classifies GitHub content sha mismatches as recoverable", () => {
+    const error = new GitHubApiError(
+      "medium/longest-palindromic-substring/solution.java does not match 8b470d1f34c2362735a1fcd3aaa5b152391edffb",
+      422
+    );
+
+    expect(error.isShaConflict).toBe(true);
+    expect(error.isRecoverable).toBe(true);
+  });
 });

@@ -67,13 +67,18 @@ async function processQueueInternal(): Promise<void> {
       await showSyncNotification(result.status, item.submission.problemTitle);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to sync submission.";
+      const retrySilently = shouldRetrySilently(error);
       await updateQueueItem(item.id, {
         status: "failed",
-        lastError: message,
+        lastError: retrySilently ? undefined : message,
         retryCount: item.retryCount + 1
       });
-      await setSyncStatus(statusFromError(error), message);
-      await showFailureNotification(item.submission.problemTitle, message);
+      if (retrySilently) {
+        await setSyncStatus("syncing");
+      } else {
+        await setSyncStatus(statusFromError(error), message);
+        await showFailureNotification(item.submission.problemTitle, message);
+      }
 
       if (!(error instanceof GitHubApiError) || !error.isRecoverable) {
         return;
@@ -91,6 +96,10 @@ function statusFromError(error: unknown) {
     return error.isAuthError ? "authentication_expired" : "github_api_error";
   }
   return "github_api_error";
+}
+
+function shouldRetrySilently(error: unknown): boolean {
+  return error instanceof GitHubApiError && error.isRecoverable && error.isShaConflict;
 }
 
 async function refreshBadge(): Promise<void> {

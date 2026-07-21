@@ -18,6 +18,10 @@ export class GitHubApiError extends Error {
   }
 
   get isRecoverable(): boolean {
-    return this.status === 0 || this.status === 409 || this.status === 429 || this.status >= 500 || this.isRateLimit;
+    return this.status === 0 || this.status === 409 || this.status === 429 || this.status >= 500 || this.isRateLimit || this.isShaConflict;
+  }
+
+  get isShaConflict(): boolean {
+    return (this.status === 409 || this.status === 422) && /sha|does not match|exists/i.test(this.message);
   }
 }

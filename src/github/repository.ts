@@ -108,6 +108,7 @@ async function putWithRetry(
   }
 ): Promise<{ commitSha?: string; contentSha?: string }> {
   let currentInput = { ...input };
+  let conflictSha: string | undefined;
   const maxAttempts = 5;
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
@@ -120,7 +121,8 @@ async function putWithRetry(
     if (existing?.content === currentInput.content) {
       return { contentSha: existing.sha };
     }
-    currentInput = { ...currentInput, sha: existing?.sha };
+    currentInput = { ...currentInput, sha: conflictSha ?? existing?.sha };
+    conflictSha = undefined;
 
     try {
       return await client.putFile(currentInput);
@@ -128,6 +130,7 @@ async function putWithRetry(
       if (!isShaConflict(error) || attempt === maxAttempts - 1) {
         throw error;
       }
+      conflictSha = extractShaFromConflict(error) ?? undefined;
       await delay(150 * (attempt + 1));
     }
   }
@@ -136,11 +139,16 @@ async function putWithRetry(
 }
 
 function isShaConflict(error: unknown): boolean {
-  return (
-    error instanceof GitHubApiError &&
-    (error.status === 409 || error.status === 422) &&
-    /sha|does not match|exists/i.test(error.message)
-  );
+  return error instanceof GitHubApiError && error.isShaConflict;
+}
+
+function extractShaFromConflict(error: unknown): string | null {
+  if (!(error instanceof GitHubApiError)) {
+    return null;
+  }
+
+  const match = error.message.match(/\b[0-9a-f]{40}\b/i);
+  return match?.[0] ?? null;
 }
 
 function runSerialized<T>(operation: () => Promise<T>): Promise<T> {
